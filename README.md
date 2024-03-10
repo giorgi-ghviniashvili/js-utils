@@ -1,1 +1,1 @@
-# A collection of javascript utility functions, data visualization utilities 
+# A collection of javascript and data visualization utility functions
