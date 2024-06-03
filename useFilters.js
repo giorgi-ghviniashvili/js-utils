@@ -1,3 +1,4 @@
+// USE THIS FUNCTION TO RENDER FILTERS
 // A react hook that finds filter options for category and range filters. 
 // The filterConfig should look like this:
 // [
