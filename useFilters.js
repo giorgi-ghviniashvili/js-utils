@@ -160,3 +160,82 @@ export default function useFilters({ data, filtersConfig }) {
 
 	return filters
 }
+
+
+
+// filterObj: { AcademicScore: [[0, 10], [10, 20]] }
+// filters: outout of useFilters hook function
+// data: an array of objects
+export const filterData = (filterObj, data, filters) => {
+	const filterEntries = Object.entries(filterObj)
+
+		let filteredData = data
+
+		if (filterEntries.length) {
+			filteredData = data.filter(d => {
+				return filterEntries
+					.filter(([key, value]) => {
+						const filter = filtersConfig.find(d => d.field === key)
+						const hasValue = !!value
+
+						if (!filter) {
+							return false
+						}
+
+						if (filter.type === 'category' || filter.type === 'range') {
+							return value?.length
+						}
+
+						return hasValue
+					})
+					.every(([key, value]) => {
+						const filterConf = filtersConfig.find(d => d.field === key)
+
+						if (filterConf.type === 'date') {
+							return d.dateObj >= value
+						}
+
+						if (filterConf.type === 'range') {
+							const filterOption =
+								filters.find(f => f.field === filterConf.field)?.options || []
+
+							let minValueToCheck = filterConf.minField
+								? d[filterConf.minField]
+								: d[filterConf.field]
+							let maxValueToCheck = filterConf.minField
+								? d[filterConf.minField]
+								: d[filterConf.field]
+
+							if (typeof minValueToCheck !== 'number') {
+								minValueToCheck = filterOption[0]
+							}
+
+							if (typeof maxValueToCheck !== 'number') {
+								maxValueToCheck = filterOption[1]
+							}
+
+							return minValueToCheck >= value[0] && maxValueToCheck <= value[1]
+						}
+						if (
+							filterConf.type === 'category' &&
+							value.some(v => Array.isArray(v))
+						) {
+							return value.some(v => {
+								if (Array.isArray(v)) {
+									return (
+										d[filterConf.field] >= v[0] && d[filterConf.field] < v[1]
+									)
+								}
+								const valueToCheck = d[key] || ''
+								return value.includes(valueToCheck)
+							})
+						}
+
+						const valueToCheck = d[key] || ''
+						return value.includes(valueToCheck)
+					})
+			})
+		}
+
+	return filteredData
+}
